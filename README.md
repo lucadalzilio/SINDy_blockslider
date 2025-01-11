@@ -1,6 +1,6 @@
 # Sparse Identification of Nonlinear Dynamics (SINDy) for System Modeling
 
-This repository contains a Python-based implementation of the **SINDy (Sparse Identification of Nonlinear Dynamics)** method, applied to model dynamic systems from time-series data. The project specifically focuses on identifying governing equations for a mass-spring-damper system, while also discussing its potential application to more complex models like **rate-and-state friction** systems.
+This repository contains a Python-based implementation of the **SINDy (Sparse Identification of Nonlinear Dynamics)** method. It demonstrates how SINDy can be used to discover governing equations of a dynamic system from time-series data, with applications to both simple systems like a mass-spring-damper system and more complex systems like **rate-and-state friction dynamics**.
 
 ---
 
@@ -28,9 +28,9 @@ This repository contains a Python-based implementation of the **SINDy (Sparse Id
 
 ## Introduction
 
-In many scientific and engineering fields, it is crucial to identify the governing equations of dynamic systems. Traditional methods rely heavily on first-principles derivations, which may not always be feasible or accurate for complex systems. **SINDy** is a data-driven approach that learns governing equations directly from measurements by leveraging sparse regression techniques.
+Dynamic systems are found in many scientific and engineering disciplines. Traditional methods for deriving governing equations require deep physical insights, which can be challenging for complex systems. **SINDy** provides a data-driven approach to identify governing equations by leveraging sparse regression techniques. 
 
-This project demonstrates the application of SINDy to a simulated **mass-spring-damper system** and discusses its potential extension to more complex systems like **rate-and-state friction dynamics** relevant in geophysics.
+This repository applies SINDy to a simulated **mass-spring-damper system** and explores its application to geophysical models like **rate-and-state friction dynamics**.
 
 ---
 
@@ -38,27 +38,33 @@ This project demonstrates the application of SINDy to a simulated **mass-spring-
 
 ### Mathematical Framework
 
-SINDy seeks to approximate the dynamics of a system described by:
+SINDy approximates the dynamics of a system as:
 \[
 \frac{d\mathbf{X}}{dt} = \mathbf{f}(\mathbf{X}),
 \]
 where:
-- \(\mathbf{X}(t) \in \mathbb{R}^n\) is the state vector (e.g., displacement, velocity),
-- \(\mathbf{f}(\mathbf{X})\) represents the system's governing equations.
+- $\mathbf{X}(t) \in \mathbb{R}^n$: State vector (e.g., displacement, velocity),
+- $\mathbf{f}(\mathbf{X})$: Governing dynamics.
 
-SINDy approximates \(\mathbf{f}(\mathbf{X})\) as:
+SINDy assumes:
 \[
 \frac{d\mathbf{X}}{dt} \approx \Theta(\mathbf{X}) \Xi,
 \]
 where:
-- \(\Theta(\mathbf{X})\): A **library of candidate functions** (e.g., polynomials, trigonometric functions, etc.),
-- \(\Xi\): A **sparse coefficient matrix** that identifies the active terms in the governing equations.
+- $\Theta(\mathbf{X})$: A **library of candidate functions**,
+- $\Xi$: A sparse matrix representing coefficients of active terms.
 
 ---
 
 ### Library of Candidate Functions
 
-The library \(\Theta(\mathbf{X})\) contains potential terms for \(\mathbf{f}(\mathbf{X})\). For example, if \(\mathbf{X} = [x_1, x_2]\), \(\Theta(\mathbf{X})\) might include:
+The library $\Theta(\mathbf{X})$ may include:
+- Constant terms: $1$
+- Linear terms: $x_i$
+- Quadratic terms: $x_i^2, x_i x_j$
+- Trigonometric terms: $\sin(x_i), \cos(x_i)$
+
+For example, if $\mathbf{X} = [x_1, x_2]$, the library may look like:
 \[
 \Theta(\mathbf{X}) = 
 \begin{bmatrix}
@@ -72,15 +78,15 @@ The library \(\Theta(\mathbf{X})\) contains potential terms for \(\mathbf{f}(\ma
 
 ### Sparse Regression
 
-To determine \(\Xi\), SINDy solves a sparse regression problem:
+The sparse coefficients $\Xi$ are determined by solving the optimization problem:
 \[
 \min_{\Xi} \| \dot{\mathbf{X}} - \Theta(\mathbf{X}) \Xi \|_2^2 + \lambda \| \Xi \|_1,
 \]
 where:
-- \(\dot{\mathbf{X}}\): Time derivatives of the state variables,
-- \(\lambda\): Regularization parameter encouraging sparsity.
+- $\dot{\mathbf{X}}$: Time derivatives of $\mathbf{X}$,
+- $\lambda$: Regularization parameter encouraging sparsity.
 
-The resulting \(\Xi\) reveals the dominant terms in \(\Theta(\mathbf{X})\), providing a concise and interpretable model of the system.
+This process ensures only the most relevant terms in $\Theta(\mathbf{X})$ are retained.
 
 ---
 
@@ -88,30 +94,31 @@ The resulting \(\Xi\) reveals the dominant terms in \(\Theta(\mathbf{X})\), prov
 
 ### Equations of Motion
 
-Rate-and-state friction describes the behavior of sliding interfaces under dynamic conditions, commonly used in geophysics to model earthquake cycles. The general form includes:
+Rate-and-state friction models describe the behavior of sliding interfaces under dynamic conditions, often used in geophysics for earthquake simulations. The general form is:
 \[
-\frac{d\mathbf{X}}{dt} = \mathbf{f}(\mathbf{X}, \mathbf{\theta}),
+\frac{d\mathbf{X}}{dt} = \mathbf{f}(\mathbf{X}, \theta),
 \]
 where:
-- \(\mathbf{X} = [x, \dot{x}]\) represents displacement and velocity,
-- \(\mathbf{\theta}\): State variable characterizing surface contact properties.
+- $\mathbf{X} = [x, \dot{x}]$: Displacement and velocity,
+- $\theta$: State variable representing surface contact properties.
 
 ---
 
 ### Friction Laws
 
-The evolution of the state variable \(\mathbf{\theta}\) is governed by specific friction laws:
+The evolution of $\theta$ follows specific friction laws:
+
 1. **Dietrich's Law**:
    \[
    \frac{d\theta}{dt} = 1 - \frac{\theta \dot{x}}{D_c},
    \]
-   where \(D_c\) is a characteristic slip distance.
+   where $D_c$ is the characteristic slip distance.
 
 2. **Ruina's Law**:
    \[
    \frac{d\theta}{dt} = -\frac{\theta \dot{x}}{D_c} \ln \left( \frac{\dot{x}}{V_*} \right),
    \]
-   where \(V_*\) is a reference velocity.
+   where $V_*$ is a reference velocity.
 
 ---
 
@@ -119,32 +126,40 @@ The evolution of the state variable \(\mathbf{\theta}\) is governed by specific 
 
 ### 1. Synthetic Data Generation
 
-Simulated data is generated for a **mass-spring-damper system**:
+Simulated data for a **mass-spring-damper system** is generated based on:
 \[
 m \ddot{x} + c \dot{x} + k x = 0,
 \]
 where:
-- \(m\): Mass,
-- \(c\): Damping coefficient,
-- \(k\): Spring constant.
+- $m$: Mass,
+- $c$: Damping coefficient,
+- $k$: Spring constant.
 
-The system is solved numerically to obtain time-series data for displacement and velocity.
+The system is numerically solved to produce time-series data for displacement and velocity.
 
 ---
 
 ### 2. SINDy Model Training
 
-SINDy uses the generated data to identify the governing equations of the system by constructing a library of candidate functions and solving the sparse regression problem.
+The SINDy algorithm uses the generated data to:
+- Construct a library of candidate functions $\Theta(\mathbf{X})$,
+- Identify sparse coefficients $\Xi$.
 
 ---
 
 ### 3. Model Evaluation
 
-The identified model is validated by comparing its predictions against the true system dynamics.
+The accuracy of the identified model is assessed by comparing its predictions with the true system dynamics.
 
 ---
 
 ## Setup and Installation
+
+### Prerequisites
+
+Ensure Python 3.7 or higher is installed.
+
+### Installation Steps
 
 1. Clone the repository:
    ```bash
