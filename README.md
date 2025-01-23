@@ -22,7 +22,6 @@ This repository contains a Python-based implementation of the **SINDy (Sparse Id
 6. [Usage Instructions](#usage-instructions)  
 7. [Results](#results)  
 8. [Conclusion and Future Work](#conclusion-and-future-work)  
-9. [References](#references)  
 
 ---
 
